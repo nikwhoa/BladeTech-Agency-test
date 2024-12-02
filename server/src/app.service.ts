@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateListDto } from '../dto/create-list.dto';
+import { List } from '@prisma/client';
 
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaClient) {}
-  async getHello(): Promise<{ id: string; name: string }[]> {
-    const list = await this.prisma.list.findMany();
-    return list;
+  constructor(private prisma: PrismaService) {}
+
+  async getHello(): Promise<List[]> {
+    return this.prisma.list.findMany();
   }
 
-  async postHello(body: any): Promise<{ id: string; name: string }> {
-    const list = await this.prisma.list.create({
+  async postHello(data: CreateListDto): Promise<List> {
+    return this.prisma.list.create({
       data: {
-        name: body.name,
+        name: data.name,
       },
     });
-
-    return { id: list.id, name: list.name };
   }
 }

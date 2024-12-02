@@ -1,14 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from '../prisma/prisma.service';
 
-describe('AppController', () => {
-  let appController: AppController;
+describe('AppService', () => {
+  let service: AppService;
+  let prismaService: PrismaService;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         AppService,
         {
@@ -27,20 +26,27 @@ describe('AppController', () => {
       ],
     }).compile();
 
-    appController = app.get<AppController>(AppController);
+    service = module.get<AppService>(AppService);
+    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   describe('getHello', () => {
-    it('should return an array of items', async () => {
-      const result = await appController.getHello();
+    it('should return all list items', async () => {
+      const result = await service.getHello();
       expect(result).toEqual([{ id: '1', name: 'Test Item' }]);
+      expect(prismaService.list.findMany).toHaveBeenCalled();
     });
   });
 
   describe('postHello', () => {
-    it('should create a new item', async () => {
-      const result = await appController.postHello({ name: 'New Item' });
+    it('should create a new list item', async () => {
+      const newItem = { name: 'New Item' };
+      const result = await service.postHello(newItem);
+
       expect(result).toEqual({ id: '2', name: 'New Item' });
+      expect(prismaService.list.create).toHaveBeenCalledWith({
+        data: newItem,
+      });
     });
   });
 });
